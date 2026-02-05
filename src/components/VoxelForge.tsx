@@ -73,17 +73,20 @@ export const VoxelForge: React.FC = () => {
             body: JSON.stringify({ prompt })
         });
 
-        if (!response.ok) throw new Error('API Error');
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || data.debug || 'API Error');
+        }
         
         setStatus('assembling');
-        const data = await response.json();
         
         if (Array.isArray(data)) {
             setMascot(data);
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Forge failed:", error);
-        alert("La forja neural falló. Asegúrate de configurar la GOOGLE_API_KEY en Vercel.");
+        alert(`La forja neural falló: ${error.message}. Revisa los logs en Vercel.`);
     } finally {
         setIsGenerating(false);
         setStatus('ready');

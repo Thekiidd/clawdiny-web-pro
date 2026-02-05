@@ -19,7 +19,11 @@ export default async function handler(req: any, res: any) {
   const API_KEY = process.env.GOOGLE_API_KEY;
   
   if (!API_KEY) {
-    return res.status(500).json({ error: 'Server configuration error: Missing API Key' });
+    console.error("CRITICAL: GOOGLE_API_KEY is missing from process.env");
+    return res.status(500).json({ 
+      error: 'Server configuration error: Missing API Key',
+      debug: 'Check Vercel Dashboard > Environment Variables' 
+    });
   }
 
   try {
