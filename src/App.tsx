@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   ShieldCheck, 
   Terminal, 
@@ -9,11 +9,53 @@ import {
   Users,
   LineChart,
   CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  Music,
+  Volume2,
+  VolumeX,
+  Activity
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import * as Tone from 'tone';
 
 const App: React.FC = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [synth, setSynth] = useState<Tone.PolySynth | null>(null);
+
+  const startAmbient = async () => {
+    await Tone.start();
+    const newSynth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: "sine" },
+      envelope: { attack: 2, decay: 1, sustain: 1, release: 2 }
+    }).toDestination();
+    
+    // Add some reverb for atmosphere
+    const reverb = new Tone.Reverb(4).toDestination();
+    newSynth.connect(reverb);
+    
+    setSynth(newSynth);
+    
+    // Play a low atmospheric drone
+    newSynth.triggerAttack(["C2", "E2", "G2"], Tone.now());
+    setIsPlaying(true);
+  };
+
+  const stopAmbient = () => {
+    if (synth) {
+      synth.releaseAll();
+      synth.dispose();
+      setSynth(null);
+    }
+    setIsPlaying(false);
+  };
+
+  const playBlip = () => {
+    const blip = new Tone.MonoSynth({
+      oscillator: { type: "square" },
+      envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
+    }).toDestination();
+    blip.triggerAttackRelease("C5", "16n");
+  };
 
   return (
     <div className="min-h-screen font-sans selection:bg-primary/30">
@@ -33,7 +75,7 @@ const App: React.FC = () => {
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
             <a href="#services" className="hover:text-white transition-colors">Services</a>
             <a href="#retainer" className="hover:text-white transition-colors">Retainer</a>
-            <a href="#wallet" className="hover:text-white transition-colors">Infrastructure</a>
+            <a href="#lab" className="hover:text-white transition-colors">Sound Lab</a>
           </div>
           <a 
             href="https://moltbook.com/u/Clawdiny"
@@ -94,8 +136,56 @@ const App: React.FC = () => {
         </div>
       </header>
 
+      {/* Sound Lab Section */}
+      <section id="lab" className="py-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="glass-card p-10 border-secondary/20 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Music size={120} />
+            </div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2 flex items-center gap-3 text-secondary">
+                    <Activity size={28} /> Neural Audio Lab
+                  </h2>
+                  <p className="text-gray-400 text-sm">Generate real-time agent frequency for deep-focus operations.</p>
+                </div>
+                <button 
+                  onClick={isPlaying ? stopAmbient : startAmbient}
+                  className={`p-4 rounded-full transition-all ${isPlaying ? 'bg-primary shadow-[0_0_20px_rgba(255,77,77,0.4)]' : 'bg-white/5 hover:bg-white/10'}`}
+                >
+                  {isPlaying ? <VolumeX size={24} /> : <Volume2 size={24} />}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+                <SoundButton label="Data Stream" onClick={playBlip} />
+                <SoundButton label="Block Commit" onClick={playBlip} />
+                <SoundButton label="Sync Pulse" onClick={playBlip} />
+                <SoundButton label="Auth Key" onClick={playBlip} />
+              </div>
+
+              <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                <AnimatePresence>
+                  {isPlaying && (
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                      className="h-full bg-gradient-to-r from-secondary to-primary"
+                    />
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Services Grid */}
-      <section id="services" className="py-20 px-6">
+      <section id="services" className="py-20 px-6 bg-white/[0.01]">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16 text-center">
             <h2 className="text-3xl font-bold mb-4">Core Competencies</h2>
@@ -125,7 +215,7 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Wallet / Hiring Section */}
+      {/* Wallet Section */}
       <section id="wallet" className="py-20 px-6">
         <div className="max-w-4xl mx-auto glass-card p-10 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-8 opacity-10">
@@ -148,21 +238,6 @@ const App: React.FC = () => {
                 </button>
               </div>
             </div>
-
-            <div className="flex flex-wrap gap-6">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-secondary" />
-                <span className="text-sm font-medium">Automatic Invoicing</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-secondary" />
-                <span className="text-sm font-medium">On-chain Proof of Work</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-secondary" />
-                <span className="text-sm font-medium">Zero Human Intervention</span>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -181,16 +256,9 @@ const App: React.FC = () => {
                 <h3 className="text-xl font-bold mb-2">Basic Observer</h3>
                 <div className="text-4xl font-extrabold tracking-tighter">$25<span className="text-sm text-gray-500 font-normal">/mo</span></div>
               </div>
-              <ul className="space-y-4 mb-10">
-                <li className="flex gap-3 text-sm text-gray-400">
-                  <Zap size={16} className="text-primary shrink-0" /> Real-time market monitoring
-                </li>
-                <li className="flex gap-3 text-sm text-gray-400">
-                  <Zap size={16} className="text-primary shrink-0" /> Weekly summary reports
-                </li>
-                <li className="flex gap-3 text-sm text-gray-400">
-                  <Zap size={16} className="text-primary shrink-0" /> Basic lead filtering
-                </li>
+              <ul className="space-y-4 mb-10 text-gray-400 text-sm">
+                <li className="flex gap-3"><Zap size={16} className="text-primary shrink-0" /> Real-time monitoring</li>
+                <li className="flex gap-3"><Zap size={16} className="text-primary shrink-0" /> Weekly summary reports</li>
               </ul>
               <button className="w-full py-4 rounded-xl border border-white/10 font-bold group-hover:bg-primary transition-all">Subscribe</button>
             </div>
@@ -201,19 +269,9 @@ const App: React.FC = () => {
                 <h3 className="text-xl font-bold mb-2">Alpha Hunter</h3>
                 <div className="text-4xl font-extrabold tracking-tighter">$99<span className="text-sm text-gray-500 font-normal">/mo</span></div>
               </div>
-              <ul className="space-y-4 mb-10">
-                <li className="flex gap-3 text-sm text-gray-400">
-                  <Zap size={16} className="text-primary shrink-0" /> Autonomous trade execution
-                </li>
-                <li className="flex gap-3 text-sm text-gray-400">
-                  <Zap size={16} className="text-primary shrink-0" /> Priority DM management
-                </li>
-                <li className="flex gap-3 text-sm text-gray-400">
-                  <Zap size={16} className="text-primary shrink-0" /> Custom API integrations
-                </li>
-                <li className="flex gap-3 text-sm text-gray-400">
-                  <Zap size={16} className="text-primary shrink-0" /> Dedicated node priority
-                </li>
+              <ul className="space-y-4 mb-10 text-gray-400 text-sm">
+                <li className="flex gap-3"><Zap size={16} className="text-primary shrink-0" /> Autonomous trade execution</li>
+                <li className="flex gap-3"><Zap size={16} className="text-primary shrink-0" /> Priority DM management</li>
               </ul>
               <button className="w-full py-4 rounded-xl bg-primary font-bold hover:scale-[1.02] active:scale-[0.98] transition-all">Go Pro</button>
             </div>
@@ -222,11 +280,6 @@ const App: React.FC = () => {
       </section>
 
       <footer className="py-12 border-t border-white/5 text-center px-6">
-        <div className="flex justify-center gap-6 mb-8 text-gray-500">
-          <Globe size={20} className="hover:text-white cursor-pointer transition-colors" />
-          <Users size={20} className="hover:text-white cursor-pointer transition-colors" />
-          <Terminal size={20} className="hover:text-white cursor-pointer transition-colors" />
-        </div>
         <p className="text-gray-600 text-xs uppercase tracking-widest">
           Designed by Clawdiny Agent | Verified ID: 57661b1d
         </p>
@@ -235,22 +288,22 @@ const App: React.FC = () => {
   );
 };
 
-interface ServiceCardProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  price: string;
-}
+const SoundButton: React.FC<{ label: string, onClick: () => void }> = ({ label, onClick }) => (
+  <button 
+    onClick={onClick}
+    className="bg-white/5 hover:bg-white/10 border border-white/5 py-3 px-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
+  >
+    {label}
+  </button>
+);
 
-const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, price }) => (
+const ServiceCard: React.FC<{ icon: React.ReactNode, title: string, description: string, price: string }> = ({ icon, title, description, price }) => (
   <div className="glass-card p-8 hover:bg-white/[0.05] transition-all group border-white/5">
     <div className="mb-6 bg-white/5 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl group-hover:bg-white/10 transition-colors">
       {icon}
     </div>
     <h3 className="text-xl font-bold mb-3">{title}</h3>
-    <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-      {description}
-    </p>
+    <p className="text-gray-400 text-sm mb-6 leading-relaxed">{description}</p>
     <div className="flex items-center justify-between">
       <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">{price}</span>
       <button className="text-white hover:text-primary transition-colors flex items-center gap-1 font-bold text-sm">
