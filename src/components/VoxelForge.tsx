@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Float, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
-import { Box, Sparkles, Loader2, Download, Trash2, Send, Cpu } from 'lucide-react';
+import { Box, Loader2, Cpu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Voxel {
@@ -67,7 +67,6 @@ export const VoxelForge: React.FC = () => {
     setStatus('analyzing');
 
     try {
-        // LLAMADA RELATIVA (Funciona en Local y en Vercel)
         const response = await fetch('/api/forge', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -84,7 +83,7 @@ export const VoxelForge: React.FC = () => {
         }
     } catch (error) {
         console.error("Forge failed:", error);
-        alert("La forja neural falló. Asegúrate de que el servidor backend esté corriendo.");
+        alert("La forja neural falló. Asegúrate de configurar la GOOGLE_API_KEY en Vercel.");
     } finally {
         setIsGenerating(false);
         setStatus('ready');
@@ -113,7 +112,7 @@ export const VoxelForge: React.FC = () => {
           <OrbitControls enableZoom={true} autoRotate={!isGenerating} makeDefault />
           <ambientLight intensity={0.5} />
           <pointLight position={[15, 15, 15]} intensity={1.5} castShadow />
-          <spotLight position={[-10, 25, 10]} angle={0.3} penumbra={1} intensity={2} castShadow />
+          <spotLight position={[-10, 25, 10]} angle={0.3} penumbra={1} intensity={2.5} castShadow />
           <Float speed={1} rotationIntensity={0.1} floatIntensity={0.2}>
             <ColoredVoxels data={mascot} />
           </Float>
@@ -140,7 +139,7 @@ export const VoxelForge: React.FC = () => {
                 <Box size={18} className="text-primary" />
                 <h4 className="font-bold text-sm text-white uppercase tracking-widest">Mascot Prompt</h4>
             </div>
-            <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Escribe cualquier cosa... (ej: 'Caballero Negro', 'Robot Dorado', 'Dragón Verde')" className="w-full h-40 bg-black/60 border border-white/5 rounded-2xl p-4 text-xs text-white focus:border-primary/50 outline-none transition-all resize-none font-mono mb-4" />
+            <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Describe your agent..." className="w-full h-40 bg-black/60 border border-white/5 rounded-2xl p-4 text-xs text-white focus:border-primary/50 outline-none transition-all resize-none font-mono mb-4" />
             <button onClick={handleGenerate} disabled={isGenerating || !prompt} className="w-full py-4 bg-primary hover:bg-primary/90 disabled:opacity-30 text-white rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all">
                 {isGenerating ? "Reasoning..." : "Forge Original Identity"}
             </button>

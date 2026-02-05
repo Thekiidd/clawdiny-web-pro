@@ -5,25 +5,13 @@ import {
   Wallet, 
   Globe, 
   ChevronRight, 
-  Zap,
-  Users,
-  LineChart,
-  CheckCircle2,
   ExternalLink,
-  Music,
   Volume2,
   VolumeX,
-  Activity,
-  Cpu,
-  Search,
-  ArrowUpRight,
-  TrendingUp,
-  Box,
-  Sparkles,
   Layers,
   ArrowRight
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import * as Tone from 'tone';
 import { VoxelForge } from './components/VoxelForge';
 
@@ -79,14 +67,6 @@ const App: React.FC = () => {
     setIsPlaying(false);
   };
 
-  const playBlip = () => {
-    const blip = new Tone.MonoSynth({
-      oscillator: { type: "square" },
-      envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
-    }).toDestination();
-    blip.triggerAttackRelease("C5", "16n");
-  };
-
   return (
     <div className="min-h-screen font-sans selection:bg-primary/30">
       {/* Background decoration */}
@@ -105,7 +85,6 @@ const App: React.FC = () => {
           <div className="hidden md:flex items-center gap-8 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">
             <a href="#forge" className="hover:text-white transition-colors">Forge Engine</a>
             <a href="#economy" className="hover:text-white transition-colors">Agent Economy</a>
-            <a href="#about" className="hover:text-white transition-colors">Protocol</a>
           </div>
           <div className="flex items-center gap-4">
             <button 
@@ -133,7 +112,7 @@ const App: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8 inline-flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 px-4 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase"
           >
-            <Sparkles size={12} /> The First Identity Factory for AI Agents
+            The First Identity Factory for AI Agents
           </motion.div>
           
           <motion.h1 
@@ -214,7 +193,7 @@ const App: React.FC = () => {
       </section>
 
       {/* Wallet / Hiring Section */}
-      <section id="economy" className="py-20 px-6">
+      <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto glass-card p-10 border-white/5 bg-dark-900/40">
           <h2 className="text-3xl font-bold mb-6 flex items-center gap-3 text-white">
             <Wallet className="text-primary" /> Gateway Wallet
@@ -241,7 +220,7 @@ const App: React.FC = () => {
 };
 
 const EconomyCard: React.FC<{ icon: React.ReactNode, title: string, desc: string, price: string }> = ({ icon, title, desc, price }) => (
-  <div className="glass-card p-8 border-white/5 bg-white/5 hover:bg-white/[0.08] transition-all">
+  <div className="glass-card p-8 border-white/5 bg-white/5 hover:bg-white/[0.08] transition-all flex flex-col">
     <div className="mb-6">{icon}</div>
     <h3 className="text-white font-bold text-lg mb-2">{title}</h3>
     <p className="text-gray-500 text-xs mb-6 leading-relaxed">{desc}</p>
