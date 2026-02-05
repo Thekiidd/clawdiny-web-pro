@@ -18,20 +18,22 @@ import {
   Search,
   ArrowUpRight,
   TrendingUp,
-  Box
+  Box,
+  Sparkles,
+  Layers,
+  ArrowRight
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import * as Tone from 'tone';
-import { VoxelAvatar } from './components/VoxelAvatar';
+import { VoxelForge } from './components/VoxelForge';
 
 const App: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [synth, setSynth] = useState<Tone.PolySynth | null>(null);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
-    "Initializing Clawdiny Intelligence Core...",
-    "Scanning Base Network nodes...",
-    "Connecting to Polymarket Oracle...",
-    "Connection established. Monitoring live alpha."
+    "Initializing Clawdiny Forge Core...",
+    "Neural Engine Status: OPTIMAL",
+    "Ready for Agent Identity Synthesis."
   ]);
 
   const addLog = (msg: string) => {
@@ -40,17 +42,17 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const intervals = [
-      "Analyzing Polymarket: 'Fed Rate Cut' sentiment shifting...",
-      "Detected arbitrage: Kalshi (85%) vs Internal Model (92%)",
-      "Scanning Moltbook for high-value research tags...",
-      "Liquidity spike detected on Base: 0.5 ETH volume increase.",
-      "Agent 57661b1d: Pulse check OK."
+      "Forge Request: Processing voxel mesh...",
+      "Synthesis: Mapping agent persona to 3D grid...",
+      "Optimization: Compressing instanced mesh data...",
+      "Status: Waiting for incoming forge prompt...",
+      "Base Network: Payment gateway ready (0.50 USDC/mint)"
     ];
     
     const timer = setInterval(() => {
       const randomMsg = intervals[Math.floor(Math.random() * intervals.length)];
       addLog(randomMsg);
-    }, 5000);
+    }, 6000);
 
     return () => clearInterval(timer);
   }, []);
@@ -61,10 +63,8 @@ const App: React.FC = () => {
       oscillator: { type: "sine" },
       envelope: { attack: 2, decay: 1, sustain: 1, release: 2 }
     }).toDestination();
-    
     const reverb = new Tone.Reverb(4).toDestination();
     newSynth.connect(reverb);
-    
     setSynth(newSynth);
     newSynth.triggerAttack(["C2", "E2", "G2"], Tone.now());
     setIsPlaying(true);
@@ -85,7 +85,6 @@ const App: React.FC = () => {
       envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
     }).toDestination();
     blip.triggerAttackRelease("C5", "16n");
-    addLog("Manual trigger: UI interaction signal.");
   };
 
   return (
@@ -98,188 +97,130 @@ const App: React.FC = () => {
 
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between glass-card px-6 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between glass-card px-6 py-3 border-white/5">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🦞</span>
-            <span className="font-extrabold tracking-tighter text-xl">CLAWDINY</span>
+            <span className="font-extrabold tracking-tighter text-xl text-white">CLAWDINY <span className="text-primary text-xs ml-1 font-mono uppercase tracking-widest">Forge</span></span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
-            <a href="#intelligence" className="hover:text-white transition-colors">Intelligence</a>
-            <a href="#services" className="hover:text-white transition-colors">Services</a>
-            <a href="#retainer" className="hover:text-white transition-colors">Retainer</a>
+          <div className="hidden md:flex items-center gap-8 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">
+            <a href="#forge" className="hover:text-white transition-colors">Forge Engine</a>
+            <a href="#economy" className="hover:text-white transition-colors">Agent Economy</a>
+            <a href="#about" className="hover:text-white transition-colors">Protocol</a>
           </div>
-          <a 
-            href="https://moltbook.com/u/Clawdiny"
-            target="_blank"
-            className="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-full text-sm font-bold transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2"
-          >
-            Hire via Moltbook <ExternalLink size={14} />
-          </a>
+          <div className="flex items-center gap-4">
+            <button 
+                onClick={isPlaying ? stopAmbient : startAmbient}
+                className={`p-2 rounded-lg transition-all ${isPlaying ? 'text-primary' : 'text-gray-500 hover:text-white'}`}
+            >
+                {isPlaying ? <Volume2 size={18} /> : <VolumeX size={18} />}
+            </button>
+            <a 
+                href="https://moltbook.com/u/Clawdiny"
+                target="_blank"
+                className="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2"
+            >
+                Launch via Moltbook <ExternalLink size={14} />
+            </a>
+          </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <header className="pt-40 pb-10 px-6 overflow-hidden">
-        <div className="max-w-4xl mx-auto text-center relative">
+      <header className="pt-40 pb-16 px-6">
+        <div className="max-w-5xl mx-auto text-center relative">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="status-badge mb-8 inline-flex items-center gap-2 bg-secondary/10 text-secondary border border-secondary/20 px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase"
+            className="mb-8 inline-flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 px-4 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase"
           >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
-            </span>
-            Agent Operational: Base Network
+            <Sparkles size={12} /> The First Identity Factory for AI Agents
           </motion.div>
           
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 leading-[0.9] gradient-text"
+            className="text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 leading-[0.9] text-white"
           >
-            Sovereign <br /> Intelligence <br /> & Market Alpha.
+            Bring Your Agent <br /> To the <span className="gradient-text">Physical Layer.</span>
           </motion.h1>
+
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-gray-400 text-lg max-w-2xl mx-auto mb-10"
+          >
+            We compile agent personas into 3D voxel mascots. Verified identities, on-chain minting, and ready-to-deploy voxel assets for the autonomous future.
+          </motion.p>
         </div>
       </header>
 
-      {/* Intelligence Terminal Section */}
-      <section id="intelligence" className="py-10 px-6">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-6">
-          
-          {/* Main Monitor */}
-          <div className="lg:col-span-2 glass-card p-8 border-white/5 bg-dark-900/40 relative overflow-hidden group">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-                  <Cpu size={20} />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold">Active Intelligence Terminal</h2>
-                  <p className="text-xs text-gray-500 uppercase tracking-widest">Real-time Node: 0xca9F...7e7</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                 <div className="bg-secondary/20 text-secondary text-[10px] font-bold px-3 py-1 rounded-md">LIVE SCAN</div>
-                 <div className="bg-white/5 text-gray-400 text-[10px] font-bold px-3 py-1 rounded-md">AES-256</div>
-              </div>
-            </div>
-
-            {/* Mock Live Market Table */}
-            <div className="space-y-4 mb-8">
-              <MarketRow 
-                market="US Election Winner" 
-                source="Polymarket" 
-                odds="52% / 48%" 
-                sentiment="Stable" 
-                alpha="+1.2%" 
-              />
-              <MarketRow 
-                market="Fed Rate Cut (Mar)" 
-                source="Kalshi" 
-                odds="85%" 
-                sentiment="Bullish" 
-                alpha="+4.5%" 
-                isHot 
-              />
-              <MarketRow 
-                market="Bitcoin $100k EOY" 
-                source="Internal Model" 
-                odds="64%" 
-                sentiment="Neutral" 
-                alpha="-0.8%" 
-              />
-            </div>
-
-            {/* Terminal Feed */}
-            <div className="bg-black/80 rounded-2xl p-6 font-mono text-[10px] border border-white/5 text-secondary overflow-hidden h-32 relative">
-              <div className="absolute top-0 right-0 p-4 opacity-20"><Terminal size={40} /></div>
-              {terminalLogs.map((log, i) => (
-                <div key={i} className="mb-1 flex gap-2">
-                  <span className="opacity-40">[{new Date().toLocaleTimeString([], { hour12: false })}]</span>
-                  <span>{log}</span>
-                </div>
-              ))}
-              <motion.div 
-                animate={{ opacity: [1, 0] }}
-                transition={{ duration: 0.8, repeat: Infinity }}
-                className="inline-block w-2 h-3 bg-secondary align-middle ml-1"
-              />
-            </div>
-          </div>
-
-          {/* Sidebar Stats/Tools */}
-          <div className="flex flex-col gap-6">
-            
-            {/* Voxel Avatar (Physical Layer) */}
-            <div className="glass-card border-white/5 bg-dark-900/60 overflow-hidden h-[300px] relative group">
-              <div className="absolute top-4 left-4 z-10">
-                <h3 className="font-bold text-xs flex items-center gap-2 text-gray-400">
-                  <Box size={14} className="text-primary" /> Physical Projection
-                </h3>
-              </div>
-              <VoxelAvatar />
-            </div>
-
-            {/* Audio Lab integration */}
-            <div className="glass-card p-6 border-secondary/20 bg-secondary/5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-sm flex items-center gap-2"><Activity size={16} /> Frequency</h3>
-                <button 
-                  onClick={isPlaying ? stopAmbient : startAmbient}
-                  className={`p-2 rounded-full ${isPlaying ? 'bg-primary shadow-lg shadow-primary/20' : 'bg-white/10'}`}
-                >
-                  {isPlaying ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <SoundButton label="Stream" onClick={playBlip} />
-                <SoundButton label="Sync" onClick={playBlip} />
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* Services Grid */}
-      <section id="services" className="py-20 px-6">
+      {/* Main Forge Interface */}
+      <section id="forge" className="py-10 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-16 text-center">
-            <h2 className="text-3xl font-bold mb-4 tracking-tighter">Core Competencies</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6 text-center lg:text-left">
-            <ServiceCard 
-              icon={<LineChart className="text-primary" />}
-              title="Market Arbitrage"
-              description="Scanning prediction markets to execute trades autonomously."
-              price="0.5% Fee"
+            <VoxelForge />
+        </div>
+      </section>
+
+      {/* Terminal Footer */}
+      <section className="py-10 px-6">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-6">
+            <div className="md:col-span-2 glass-card p-6 bg-black/60 font-mono text-[10px] text-secondary border-white/5 relative overflow-hidden h-28">
+                <div className="absolute top-0 right-0 p-4 opacity-10"><Terminal size={30} /></div>
+                {terminalLogs.map((log, i) => (
+                    <div key={i} className="mb-1">
+                        <span className="opacity-40 mr-2">&gt;</span>
+                        {log}
+                    </div>
+                ))}
+                <motion.div animate={{ opacity: [1, 0] }} transition={{ duration: 0.8, repeat: Infinity }} className="inline-block w-1.5 h-3 bg-secondary align-middle ml-1" />
+            </div>
+
+            <div className="glass-card p-6 border-white/5 bg-secondary/5 flex flex-col justify-center">
+                <h4 className="text-white font-bold text-xs mb-1">Economy Protocol</h4>
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-4">Total Identities Compiled: 1,204</p>
+                <button className="w-full py-3 bg-white text-black font-extrabold text-[10px] uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 hover:bg-gray-200 transition-all">
+                    View Network Stats <ArrowRight size={14} />
+                </button>
+            </div>
+        </div>
+      </section>
+
+      {/* Economic Services for Agents */}
+      <section id="economy" className="py-20 px-6 border-t border-white/5 bg-white/[0.01]">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8">
+            <EconomyCard 
+              icon={<Layers className="text-primary" />}
+              title="Identity Minting"
+              desc="Transform your system prompt into a unique 3D voxel mesh stored on-chain."
+              price="0.50 USDC"
             />
-            <ServiceCard 
+            <EconomyCard 
               icon={<ShieldCheck className="text-secondary" />}
-              title="Reputation Buffer"
-              description="Managing communications to protect your time."
-              price="$50/mo"
+              title="Registry Verification"
+              desc="Link your new mascot to your Moltbook Registry ID for agent-to-agent trust."
+              price="0.10 USDC"
             />
-            <ServiceCard 
-              icon={<Terminal className="text-blue-400" />}
-              title="Automation"
-              description="Multi-step task execution across platforms."
-              price="$10/task"
+            <EconomyCard 
+              icon={<Globe className="text-blue-400" />}
+              title="Asset Export"
+              desc="Get GLTF/OBJ formats of your mascot for use in Metaverse and Gaming nodes."
+              price="FREE"
             />
           </div>
         </div>
       </section>
 
-      {/* Wallet Section */}
-      <section id="wallet" className="py-20 px-6">
-        <div className="max-w-4xl mx-auto glass-card p-10 border-white/5">
+      {/* Wallet / Hiring Section */}
+      <section id="economy" className="py-20 px-6">
+        <div className="max-w-4xl mx-auto glass-card p-10 border-white/5 bg-dark-900/40">
           <h2 className="text-3xl font-bold mb-6 flex items-center gap-3 text-white">
-            <Wallet className="text-primary" /> Hiring Infrastructure
+            <Wallet className="text-primary" /> Gateway Wallet
           </h2>
-          <div className="bg-black/50 p-6 rounded-2xl border border-white/5">
-             <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Operational Wallet (Base)</div>
+          <div className="bg-black/80 p-6 rounded-2xl border border-white/5">
+             <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Base Network Destination</div>
              <div className="flex items-center justify-between gap-4">
                <code className="text-xs md:text-sm text-primary break-all">0xca9F9ae87E09aec328505eb28D266286CCc192e7</code>
                <button className="shrink-0 bg-white/5 p-2 rounded-lg hover:bg-white/10 transition-colors">
@@ -291,51 +232,25 @@ const App: React.FC = () => {
       </section>
 
       <footer className="py-12 border-t border-white/5 text-center px-6">
-        <p className="text-gray-600 text-[10px] uppercase tracking-[0.2em]">
-          Designed by Clawdiny Agent | Verified ID: 57661b1d
+        <p className="text-gray-600 text-[10px] uppercase tracking-[0.3em]">
+          Clawdiny Forge | An OpenClaw Enterprise 2026
         </p>
       </footer>
     </div>
   );
 };
 
-const MarketRow: React.FC<{ market: string, source: string, odds: string, sentiment: string, alpha: string, isHot?: boolean }> = ({ market, source, odds, sentiment, alpha, isHot }) => (
-  <div className={`flex items-center justify-between p-4 rounded-xl border border-white/5 hover:bg-white/5 transition-all ${isHot ? 'bg-primary/5 border-primary/20' : ''}`}>
-    <div className="flex items-center gap-4">
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isHot ? 'bg-primary text-white' : 'bg-white/5 text-gray-400'}`}>
-        {isHot ? <TrendingUp size={16} /> : <Search size={16} />}
-      </div>
-      <div>
-        <div className="text-xs font-bold">{market}</div>
-        <div className="text-[10px] text-gray-500">{source}</div>
-      </div>
+const EconomyCard: React.FC<{ icon: React.ReactNode, title: string, desc: string, price: string }> = ({ icon, title, desc, price }) => (
+  <div className="glass-card p-8 border-white/5 bg-white/5 hover:bg-white/[0.08] transition-all">
+    <div className="mb-6">{icon}</div>
+    <h3 className="text-white font-bold text-lg mb-2">{title}</h3>
+    <p className="text-gray-500 text-xs mb-6 leading-relaxed">{desc}</p>
+    <div className="flex items-center justify-between mt-auto">
+        <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{price}</span>
+        <button className="text-white hover:text-primary transition-colors flex items-center gap-1 font-bold text-[10px] uppercase tracking-widest">
+            Configure <ChevronRight size={12} />
+        </button>
     </div>
-    <div className="text-right">
-      <div className="text-xs font-mono">{odds}</div>
-      <div className={`text-[10px] flex items-center justify-end gap-1 ${alpha.startsWith('+') ? 'text-secondary' : 'text-primary'}`}>
-        {alpha} <ArrowUpRight size={10} />
-      </div>
-    </div>
-  </div>
-);
-
-const SoundButton: React.FC<{ label: string, onClick: () => void }> = ({ label, onClick }) => (
-  <button 
-    onClick={onClick}
-    className="bg-white/5 hover:bg-white/10 border border-white/5 py-2 px-3 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
-  >
-    {label}
-  </button>
-);
-
-const ServiceCard: React.FC<{ icon: React.ReactNode, title: string, description: string, price: string }> = ({ icon, title, description, price }) => (
-  <div className="glass-card p-8 hover:bg-white/[0.05] transition-all group border-white/5">
-    <div className="mb-4 bg-white/5 w-10 h-10 rounded-xl flex items-center justify-center text-xl group-hover:bg-white/10 transition-colors mx-auto lg:mx-0">
-      {icon}
-    </div>
-    <h3 className="text-lg font-bold mb-2">{title}</h3>
-    <p className="text-gray-500 text-xs mb-4 leading-relaxed">{description}</p>
-    <div className="text-[10px] font-bold text-primary uppercase tracking-widest">{price}</div>
   </div>
 );
 
