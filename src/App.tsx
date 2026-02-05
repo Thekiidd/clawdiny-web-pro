@@ -18,10 +18,11 @@ import {
   Search,
   ArrowUpRight,
   TrendingUp,
-  AlertTriangle
+  Box
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import * as Tone from 'tone';
+import { VoxelAvatar } from './components/VoxelAvatar';
 
 const App: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -211,13 +212,23 @@ const App: React.FC = () => {
           {/* Sidebar Stats/Tools */}
           <div className="flex flex-col gap-6">
             
+            {/* Voxel Avatar (Physical Layer) */}
+            <div className="glass-card border-white/5 bg-dark-900/60 overflow-hidden h-[300px] relative group">
+              <div className="absolute top-4 left-4 z-10">
+                <h3 className="font-bold text-xs flex items-center gap-2 text-gray-400">
+                  <Box size={14} className="text-primary" /> Physical Projection
+                </h3>
+              </div>
+              <VoxelAvatar />
+            </div>
+
             {/* Audio Lab integration */}
             <div className="glass-card p-6 border-secondary/20 bg-secondary/5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-sm flex items-center gap-2"><Activity size={16} /> Frequency</h3>
                 <button 
                   onClick={isPlaying ? stopAmbient : startAmbient}
-                  className={`p-2 rounded-full ${isPlaying ? 'bg-primary' : 'bg-white/10'}`}
+                  className={`p-2 rounded-full ${isPlaying ? 'bg-primary shadow-lg shadow-primary/20' : 'bg-white/10'}`}
                 >
                   {isPlaying ? <VolumeX size={16} /> : <Volume2 size={16} />}
                 </button>
@@ -226,19 +237,6 @@ const App: React.FC = () => {
                 <SoundButton label="Stream" onClick={playBlip} />
                 <SoundButton label="Sync" onClick={playBlip} />
               </div>
-            </div>
-
-            {/* Alpha Alerts */}
-            <div className="glass-card p-6 border-white/5 flex-1">
-              <h3 className="font-bold text-sm mb-4 flex items-center gap-2"><AlertTriangle size={16} className="text-primary" /> Alpha Alerts</h3>
-              <div className="space-y-4">
-                <AlertItem title="Kalshi Discrepancy" time="2m ago" />
-                <AlertItem title="Moltbook Sentiment" time="15m ago" />
-                <AlertItem title="Base Whale Alert" time="1h ago" />
-              </div>
-              <button className="w-full mt-6 py-3 rounded-xl bg-white text-black font-bold text-xs hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
-                Subscribe to Alerts <ChevronRight size={14} />
-              </button>
             </div>
 
           </div>
@@ -277,7 +275,7 @@ const App: React.FC = () => {
       {/* Wallet Section */}
       <section id="wallet" className="py-20 px-6">
         <div className="max-w-4xl mx-auto glass-card p-10 border-white/5">
-          <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+          <h2 className="text-3xl font-bold mb-6 flex items-center gap-3 text-white">
             <Wallet className="text-primary" /> Hiring Infrastructure
           </h2>
           <div className="bg-black/50 p-6 rounded-2xl border border-white/5">
@@ -318,13 +316,6 @@ const MarketRow: React.FC<{ market: string, source: string, odds: string, sentim
         {alpha} <ArrowUpRight size={10} />
       </div>
     </div>
-  </div>
-);
-
-const AlertItem: React.FC<{ title: string, time: string }> = ({ title, time }) => (
-  <div className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
-    <div className="text-xs font-medium text-gray-300">{title}</div>
-    <div className="text-[10px] text-gray-600">{time}</div>
   </div>
 );
 
