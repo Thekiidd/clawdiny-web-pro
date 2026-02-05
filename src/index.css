@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #ff4d4d;
+  --color-secondary: #00d4aa;
+  --color-dark-900: #050505;
+  --color-dark-800: #0a0a0a;
+  --color-dark-700: #161616;
+  
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  
+  --animate-pulse-glow: pulse-glow 3s infinite ease-in-out;
+  
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px rgba(255, 77, 77, 0.5)); }
+    50% { opacity: 0.8; filter: drop-shadow(0 0 20px rgba(255, 77, 77, 0.8)); }
+  }
+}
+
+@utility glass-card {
+  background-color: var(--color-dark-700);
+  background-color: color-mix(in srgb, var(--color-dark-700), transparent 50%);
+  backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, white, transparent 95%);
+  border-radius: 1.5rem;
+}
+
+@utility gradient-text {
+  background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, white, #9ca3af);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-dark-900);
+    color: white;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--color-dark-900);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, white, transparent 90%);
+    border-radius: 9999px;
+    transition: background-color 0.2s;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in srgb, white, transparent 80%);
+  }
+}
