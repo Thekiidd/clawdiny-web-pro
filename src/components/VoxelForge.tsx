@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Float, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
-import { Box, Loader2, Cpu } from 'lucide-react';
+import { Box, Loader2, Cpu, Sparkles, RefreshCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Voxel {
@@ -12,10 +12,18 @@ interface Voxel {
   color: string;
 }
 
-const ColoredVoxels: React.FC<{ data: Voxel[] }> = ({ data }) => {
+const ColoredVoxels: React.FC<{ data: Voxel[]; isRebuilding: boolean }> = ({ data, isRebuilding }) => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
   
+  // Current positions for animation
+  const currentPositions = useRef<THREE.Vector3[]>([]);
+
+  useEffect(() => {
+    // Initialize or reset positions
+    currentPositions.current = data.map(v => new THREE.Vector3(v.x, v.y, v.z));
+  }, [data.length]); // Reset only if count changes significantly
+
   const colors = useMemo(() => {
     const array = new Float32Array(data.length * 3);
     data.forEach((v, i) => {
@@ -30,13 +38,27 @@ const ColoredVoxels: React.FC<{ data: Voxel[] }> = ({ data }) => {
   useFrame((state) => {
     if (!meshRef.current) return;
     const time = state.clock.getElapsedTime();
+    const lerpSpeed = 0.1;
+
     data.forEach((v, i) => {
-      const offset = Math.sin(time * 2 + (v.x + v.z) * 0.2) * 0.05;
-      dummy.position.set(v.x, v.y + offset, v.z);
+      if (!currentPositions.current[i]) {
+          currentPositions.current[i] = new THREE.Vector3(v.x, v.y, v.z);
+      }
+
+      const targetPos = new THREE.Vector3(v.x, v.y, v.z);
+      currentPositions.current[i].lerp(targetPos, lerpSpeed);
+
+      const pos = currentPositions.current[i];
+      const hover = Math.sin(time * 2 + (v.x + v.z) * 0.2) * 0.05;
+      
+      dummy.position.set(pos.x, pos.y + hover, pos.z);
       dummy.updateMatrix();
       meshRef.current!.setMatrixAt(i, dummy.matrix);
+      meshRef.current!.setColorAt(i, new THREE.Color(v.color));
     });
+    
     meshRef.current.instanceMatrix.needsUpdate = true;
+    if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true;
   });
 
   return (
@@ -53,6 +75,7 @@ export const VoxelForge: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [mascot, setMascot] = useState<Voxel[]>([]);
+  const [mode, setMode] = useState<'create' | 'morph'>('create');
   const [status, setStatus] = useState<'idle' | 'analyzing' | 'assembling' | 'ready'>('idle');
 
   useEffect(() => {
@@ -70,23 +93,23 @@ export const VoxelForge: React.FC = () => {
         const response = await fetch('/api/forge', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt })
+            body: JSON.stringify({ 
+                prompt, 
+                currentModel: mode === 'morph' ? mascot : null,
+                mode 
+            })
         });
 
         const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || data.debug || 'API Error');
-        }
+        if (!response.ok) throw new Error(data.error || 'Forge failed');
         
         setStatus('assembling');
-        
         if (Array.isArray(data)) {
             setMascot(data);
         }
     } catch (error: any) {
         console.error("Forge failed:", error);
-        alert(`La forja neural falló: ${error.message}. Revisa los logs en Vercel.`);
+        alert(`Error: ${error.message}`);
     } finally {
         setIsGenerating(false);
         setStatus('ready');
@@ -102,7 +125,7 @@ export const VoxelForge: React.FC = () => {
                 <Cpu size={20} />
             </div>
             <div>
-                <h3 className="font-bold text-lg leading-tight text-white uppercase tracking-tighter">Neural Forge v1.0</h3>
+                <h3 className="font-bold text-lg leading-tight text-white uppercase tracking-tighter">Neural Forge v1.1</h3>
                 <p className="text-[10px] text-secondary font-mono tracking-widest animate-pulse">
                     {isGenerating ? `STATUS: ${status.toUpperCase()}...` : 'STATUS: READY'}
                 </p>
@@ -117,7 +140,7 @@ export const VoxelForge: React.FC = () => {
           <pointLight position={[15, 15, 15]} intensity={1.5} castShadow />
           <spotLight position={[-10, 25, 10]} angle={0.3} penumbra={1} intensity={2.5} castShadow />
           <Float speed={1} rotationIntensity={0.1} floatIntensity={0.2}>
-            <ColoredVoxels data={mascot} />
+            <ColoredVoxels data={mascot} isRebuilding={isGenerating} />
           </Float>
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
             <planeGeometry args={[40, 40]} />
@@ -130,7 +153,7 @@ export const VoxelForge: React.FC = () => {
           {isGenerating && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center z-20">
               <Loader2 className="text-primary animate-spin mb-6" size={60} />
-              <p className="font-mono text-[10px] text-primary tracking-[0.3em] uppercase">Intelligence Synthesis...</p>
+              <p className="font-mono text-[10px] text-primary tracking-[0.3em] uppercase">Synthesizing {mode === 'create' ? 'New Identity' : 'Evolution'}...</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -138,14 +161,46 @@ export const VoxelForge: React.FC = () => {
 
       <div className="w-full lg:w-80 flex flex-col gap-6">
         <div className="glass-card p-6 border-white/10 bg-white/5 flex-1 flex flex-col">
-            <div className="flex items-center gap-2 mb-6">
-                <Box size={18} className="text-primary" />
-                <h4 className="font-bold text-sm text-white uppercase tracking-widest">Mascot Prompt</h4>
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                    <Box size={18} className="text-primary" />
+                    <h4 className="font-bold text-sm text-white uppercase tracking-widest">Forge</h4>
+                </div>
+                <div className="flex bg-black/40 p-1 rounded-xl border border-white/5">
+                    <button 
+                        onClick={() => setMode('create')}
+                        className={`px-3 py-1.5 rounded-lg text-[10px] uppercase font-bold transition-all ${mode === 'create' ? 'bg-primary text-white' : 'text-gray-500 hover:text-gray-300'}`}
+                    >
+                        Create
+                    </button>
+                    <button 
+                        onClick={() => setMode('morph')}
+                        className={`px-3 py-1.5 rounded-lg text-[10px] uppercase font-bold transition-all ${mode === 'morph' ? 'bg-secondary text-white' : 'text-gray-500 hover:text-gray-300'}`}
+                    >
+                        Morph
+                    </button>
+                </div>
             </div>
-            <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Describe your agent..." className="w-full h-40 bg-black/60 border border-white/5 rounded-2xl p-4 text-xs text-white focus:border-primary/50 outline-none transition-all resize-none font-mono mb-4" />
-            <button onClick={handleGenerate} disabled={isGenerating || !prompt} className="w-full py-4 bg-primary hover:bg-primary/90 disabled:opacity-30 text-white rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all">
-                {isGenerating ? "Reasoning..." : "Forge Original Identity"}
+            
+            <textarea 
+                value={prompt} 
+                onChange={(e) => setPrompt(e.target.value)} 
+                placeholder={mode === 'create' ? "Describe a new character..." : "How should it evolve?"}
+                className="w-full h-40 bg-black/60 border border-white/5 rounded-2xl p-4 text-xs text-white focus:border-primary/50 outline-none transition-all resize-none font-mono mb-4" 
+            />
+            
+            <button 
+                onClick={handleGenerate} 
+                disabled={isGenerating || !prompt} 
+                className={`w-full py-4 rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all ${mode === 'create' ? 'bg-primary hover:bg-primary/90' : 'bg-secondary hover:bg-secondary/90'} text-white disabled:opacity-30`}
+            >
+                {isGenerating ? <Loader2 size={14} className="animate-spin" /> : mode === 'create' ? <Sparkles size={14} /> : <RefreshCcw size={14} />}
+                {isGenerating ? "Processing..." : mode === 'create' ? "Generate" : "Evolve Model"}
             </button>
+            
+            <p className="mt-4 text-[10px] text-gray-500 text-center leading-relaxed italic">
+                {mode === 'create' ? "Generates a completely new model from scratch." : "Uses the current voxels as a base for the next iteration."}
+            </p>
         </div>
       </div>
     </div>
