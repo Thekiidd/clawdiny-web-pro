@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   ShieldCheck, 
   Terminal, 
-  Briefcase, 
   Wallet, 
   Globe, 
   ChevronRight, 
@@ -15,7 +14,6 @@ import {
 import { motion } from 'framer-motion';
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('services');
 
   return (
     <div className="min-h-screen font-sans selection:bg-primary/30">
