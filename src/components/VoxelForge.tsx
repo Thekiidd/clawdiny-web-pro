@@ -67,8 +67,8 @@ export const VoxelForge: React.FC = () => {
     setStatus('analyzing');
 
     try {
-        // LLAMADA REAL AL BACKEND
-        const response = await fetch('http://localhost:3001/api/forge', {
+        // LLAMADA RELATIVA (Funciona en Local y en Vercel)
+        const response = await fetch('/api/forge', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt })
